@@ -21,9 +21,9 @@ Deploy mongo replica set sharding cluster
     - iface: 'eth1'
     - mongo_admin_pass: 123456
     - mongo_admin_user: admin
-    - db_user_pass: <db user password>
-    - db_user_name: <db user name>
-    - db_name: <db name>
+    - db_user_pass: db_user_password
+    - db_user_name: db_user_name
+    - db_name: db_name
 
 -  ### shards.yml example
 
