@@ -1,0 +1,13 @@
+
+db.auth('{{mongo_admin_user}}', '{{mongo_admin_pass}}');
+
+{% for host in groups['mongod-servers'] %}
+sh.addShard("{{host}}/{{host}}:{{hostvars[host].mongod_port}}");
+{% endfor %}
+
+printjson(sh.status());
+
+sh.enableSharding("{{db_name}}");
+{% for collection in shard_collections %}
+sh.shardCollection("{{db_name}}.{{collection.name}}",{ {{collection.key}}:{{collection.value}} });
+{% endfor %}

@@ -1,0 +1,27 @@
+configdb = db.getSiblingDB('config');
+db.settings.save({_id:"chunksize",value:{{mongos_chunk_size}}});
+
+db.createUser({
+  user: '{{mongo_admin_user}}',
+  pwd: '{{mongo_admin_pass}}',
+  roles : [
+    'userAdminAnyDatabase',
+    'clusterAdmin'
+  ]
+});
+
+db.auth('{{mongo_admin_user}}', '{{mongo_admin_pass}}');
+
+{% for host in groups['mongod-servers'] %}
+sh.addShard("{{host}}/{{host}}:{{hostvars[host].mongod_port}}");
+{% endfor %}
+
+printjson(sh.status());
+
+
+targetdb = db.getSiblingDB('{{db_name}}');
+targetdb.createUser({
+  user: '{{db_user_name}}',
+  pwd: '{{db_user_pass}}',
+  roles: ['readWrite']
+});

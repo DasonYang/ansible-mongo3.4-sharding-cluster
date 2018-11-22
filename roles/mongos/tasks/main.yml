@@ -1,0 +1,50 @@
+---
+#This Playbook configures the mongos service of mongodb
+
+- name: Create the mongos startup file
+  template: src=mongos.service.j2 dest=/etc/systemd/system/mongos.service mode=0655
+
+- name: Create the mongos configuration file
+  template: src=mongos.conf.j2 dest=/etc/mongos.conf
+
+- name: Copy the keyfile for authentication
+  copy: src=roles/mongod/files/secret dest={{ mongodb_datadir_prefix }}/secret owner=mongodb group=mongodb mode=0400
+
+- name: Start the mongodb service
+  systemd: name=mongos state=started daemon_reload=yes enabled=yes
+
+- wait_for:
+    port: "{{ mongos_port }}"
+    delay: 3
+
+- name: Copy the file to enable sharding
+  template: src=mongos_init.js.j2 dest=/tmp/mongos_init.js
+  when: "inventory_hostname == groups['mongos-servers'][0]"
+
+- name: Create sharding
+  shell: /usr/bin/mongo "localhost:{{ mongos_port }}/admin" /tmp/mongos_init.js
+  when: "inventory_hostname == groups['mongos-servers'][0]"
+
+- name: Create indexes creation js
+  template: src=mongos_indexes.js.j2 dest=/tmp/mongos_indexes.js 
+  when: "inventory_hostname == groups['mongos-servers'][0]"
+
+- name: Execute index creation
+  shell: /usr/bin/mongo "localhost:{{ mongos_port }}/{{db_name}}" /tmp/mongos_indexes.js
+  when: "inventory_hostname == groups['mongos-servers'][0]"
+
+- name: Copy the file to enable sharding
+  template: src=mongos_shards.js.j2 dest=/tmp/mongos_shards.js
+  when: "inventory_hostname == groups['mongos-servers'][0]"
+
+- name: Create sharding
+  shell: /usr/bin/mongo "localhost:{{ mongos_port }}/admin" /tmp/mongos_shards.js
+  when: "inventory_hostname == groups['mongos-servers'][0]"
+
+- name: Copy the file to insert default value
+  template: src=mongos_default.js.j2 dest=/tmp/mongos_default.js
+  when: "inventory_hostname == groups['mongos-servers'][0]"
+
+- name: Insert default documents
+  shell: /usr/bin/mongo localhost:{{ mongos_port }}/{{db_name}} /tmp/mongos_default.js
+  when: "inventory_hostname == groups['mongos-servers'][0]"

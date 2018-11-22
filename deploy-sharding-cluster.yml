@@ -1,0 +1,33 @@
+---
+- name: setup python2
+  hosts: all
+  become: true
+  gather_facts: no
+  pre_tasks:
+    - name: Install python for Ansible
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+    - setup: # aka gather_facts
+
+- name: Install packages
+  hosts: common-servers
+  roles:
+    - {role: common, tags: [full, install]}
+  become: yes
+
+- name: Setup mongod replica sets
+  hosts: mongod-servers
+  roles:
+    - {role: mongod, tags: [full, install]}
+  become: yes
+
+- name: Setup mongoc replica set
+  hosts: mongoc-servers
+  roles:
+    - {role: mongoc, tags: [full, install]}
+  become: yes
+
+- name: Setup mongos router
+  hosts: mongos-servers
+  roles:
+    - {role: mongos, tags: [full, install]}
+  become: yes

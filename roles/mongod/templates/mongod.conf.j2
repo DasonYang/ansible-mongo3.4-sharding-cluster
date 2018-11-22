@@ -1,0 +1,40 @@
+# for documentation of all options, see:
+#   http://docs.mongodb.org/manual/reference/configuration-options/
+
+# Where and how to store data.
+storage:
+  dbPath: {{ mongodb_datadir_prefix }}mongo-{{ inventory_hostname }}
+
+#  engine:
+#  mmapv1:
+#  wiredTiger:
+
+# where to write logging data.
+systemLog:
+  destination: file
+  path: "/var/log/mongo/mongod-{{ inventory_hostname }}.log"
+  logAppend: true
+
+# network interfaces
+net:
+  port: {{ mongod_port }}
+
+processManagement:
+    fork: true
+    pidFilePath: /var/run/mongo/mongod-{{ inventory_hostname }}.pid
+    
+security:
+  keyFile: {{ mongodb_datadir_prefix }}secret
+
+#operationProfiling:
+
+replication:
+  replSetName: {{ inventory_hostname }}
+  
+sharding:
+    clusterRole: shardsvr
+## Enterprise-Only Options:
+
+#auditLog:
+
+#snmp:

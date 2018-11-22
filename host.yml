@@ -1,0 +1,42 @@
+all:
+  hosts:
+    mongo1:
+      ansible_ssh_host: 192.168.33.20
+    mongo2:
+      ansible_ssh_host: 192.168.33.21
+    mongo3:
+      ansible_ssh_host: 192.168.33.22
+
+  children:
+    common-servers:
+      hosts: 
+        mongo1:
+        mongo2:
+        mongo3:
+
+    mongod-servers:
+      hosts:
+        mongo1:
+          mongod_port: 2700
+        mongo2:
+          mongod_port: 2701
+        mongo3:
+          mongod_port: 2702
+
+    replica-servers:
+      hosts:
+        mongo1:
+        mongo2:
+        mongo3:
+    
+    mongoc-servers:
+      hosts:
+        mongo1:
+        mongo2:
+        mongo3:
+
+    mongos-servers:
+      hosts:
+        mongo1:
+        mongo2:
+        mongo3:

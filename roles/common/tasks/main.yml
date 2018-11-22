@@ -1,0 +1,67 @@
+---
+- name: Set environment
+  lineinfile: dest=/etc/environment line="LC_ALL=C"
+  tags: set_env
+
+- name: Export env
+  shell: export LC_ALL="C"
+  
+- name: Install Required Packages.
+  apt:
+    pkg:
+      - curl
+      - git
+      - make
+      - gcc
+      - build-essential
+      - python-dev
+      - python-pip
+      - cmake
+      - apt-transport-https
+      - ca-certificates
+      - software-properties-common
+    update_cache: yes 
+    cache_valid_time: 3600
+
+- name: Install the latest pymongo package
+  pip: name=pymongo state=latest use_mirrors=no
+
+- name: Copy files to home dir
+  copy: src=files/{{ item }} dest={{ ansible_env.HOME }}
+  with_items:
+    - limits.conf
+    - sysctl.conf
+
+- name: Append limits.conf
+  shell: cat {{ ansible_env.HOME }}/limits.conf >> /etc/security/limits.conf
+- name: Append sysctl.conf
+  shell: cat {{ ansible_env.HOME }}/sysctl.conf >> /etc/sysctl.conf
+
+- name: Execute sysctl
+  shell: /sbin/sysctl -p
+
+- name: Import the public key used by the package management system.
+  apt_key:
+    keyserver: hkp://keyserver.ubuntu.com:80
+    id: 0C49F3730359A14518585931BC711F9BA15703C6
+
+- name: Create a list file for MongoDB.
+  shell: echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+
+- name: Install MongoDB.
+  apt:
+    name: mongodb-org
+    update_cache: yes
+
+- name: Create the data directory for the namenode metadata
+  file: path={{ mongodb_datadir_prefix }} state=directory owner=mongodb group=mongodb
+
+- name: create run directory for mongodb
+  file: path=/var/run/mongo state=directory owner=mongodb group=mongodb recurse=true
+
+- name: create log directory for mongodb
+  file: path=/var/log/mongo state=directory owner=mongodb group=mongodb recurse=true
+
+- name: Create the hosts file for all machines
+  template: src=hosts.j2 dest=/etc/hosts
+  

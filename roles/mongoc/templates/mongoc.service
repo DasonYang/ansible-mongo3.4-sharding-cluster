@@ -1,0 +1,14 @@
+[Unit]
+Description=High-performance, schema-free document-oriented database
+After=network.target
+
+[Service]
+User=mongodb
+Type=forking
+PermissionStartOnly=True
+RuntimeDirectory=mongo
+RuntimeDirectoryMode=0755
+ExecStart=/usr/bin/mongod --quiet --config /etc/mongoc.conf
+
+[Install]
+WantedBy=multi-user.target

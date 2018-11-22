@@ -1,0 +1,22 @@
+shard_collections:
+  - name: account
+    key: email
+    value: 1
+
+indexes:
+  - collection: account
+    indexes: 
+      - "email:1"
+    options:
+      - "unique:true"
+
+  - collection: log
+    indexes:
+      - "created:1"
+    options:
+      - "unique:false"
+      - "expireAfterSeconds:2591000"
+
+default_document:
+  - db: account
+    value: '{"_id":ObjectId("5b1df65df0b3284d0dc559af"),"created":ISODate("2018-06-15T07:12:13.513Z"),"updated":ISODate("2018-06-15T07:12:13.513Z"),"last_login":ISODate("2018-07-11T09:12:05.571Z"),"email":"abc@abc.com","password":"12345678"}'

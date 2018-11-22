@@ -1,0 +1,6 @@
+
+db.auth('{{db_user_name}}', '{{db_user_pass}}');
+
+{% for idx in indexes %}
+db.{{idx.collection}}.createIndex({ {{idx.indexes | join(', ')}} }, { {{idx.options | join(', ')}} })
+{% endfor %}

@@ -1,0 +1,5 @@
+db.auth('{{db_user_name}}', '{{db_user_pass}}');
+
+{% for data in default_document %}
+  db.{{data.db}}.insert({{data.value}});
+{% endfor %}
